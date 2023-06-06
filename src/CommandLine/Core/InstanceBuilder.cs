@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using CommandLine.Infrastructure;
@@ -37,7 +38,11 @@ namespace CommandLine.Core
                 nonFatalErrors);
         }
 
-        public static ParserResult<T> Build<T>(
+        public static ParserResult<T> Build<
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            T>(
             Maybe<Func<T>> factory,
             Func<IEnumerable<string>, IEnumerable<OptionSpecification>, Result<IEnumerable<Token>, Error>> tokenizer,
             IEnumerable<string> arguments,
@@ -183,7 +188,11 @@ namespace CommandLine.Core
             return mutable;
         }
 
-        private static T BuildImmutable<T>(Type typeInfo, Maybe<Func<T>> factory, IEnumerable<SpecificationProperty> specProps, IEnumerable<SpecificationProperty> specPropsWithValue, List<Error> setPropertyErrors)
+        private static T BuildImmutable<T>(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            Type typeInfo, Maybe<Func<T>> factory, IEnumerable<SpecificationProperty> specProps, IEnumerable<SpecificationProperty> specPropsWithValue, List<Error> setPropertyErrors)
         {
             var ctor = typeInfo.GetTypeInfo().GetConstructor(
                 specProps.Select(sp => sp.Property.PropertyType).ToArray()

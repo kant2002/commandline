@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using CommandLine.Infrastructure;
@@ -46,7 +47,11 @@ namespace CommandLine.Core
                         .ToMaybe();
         }
 
-        private static IEnumerable<Type> FlattenHierarchy(this Type type)
+        private static IEnumerable<Type> FlattenHierarchy(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)]
+#endif
+            this Type type)
         {
             if (type == null)
             {
@@ -63,7 +68,11 @@ namespace CommandLine.Core
             }
         }
 
-        private static IEnumerable<Type> SafeGetInterfaces(this Type type)
+        private static IEnumerable<Type> SafeGetInterfaces(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)]
+#endif
+            this Type type)
         {
             return type == null ? Enumerable.Empty<Type>() : type.GetTypeInfo().GetInterfaces();
         }
@@ -113,17 +122,31 @@ namespace CommandLine.Core
 
         }
 
-        public static object CreateEmptyArray(this Type type)
+        public static object CreateEmptyArray(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            this Type type)
         {
             return Array.CreateInstance(type, 0);
         }
 
-        public static object GetDefaultValue(this Type type)
+        public static object GetDefaultValue(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            this Type type)
         {
             return type.IsValueType ? Activator.CreateInstance(type) : null;
         }
 
-        public static bool IsMutable(this Type type)
+        [SuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.",
+                Justification = "When enumerating base type only public properties and fields accessed.")]
+        public static bool IsMutable(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.Interfaces)]
+#endif
+            this Type type)
         {
             if(type == typeof(object))
                 return true;
@@ -154,7 +177,11 @@ namespace CommandLine.Core
             return type.GetDefaultValue();
         }
 
-        public static object AutoDefault(this Type type)
+        public static object AutoDefault(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            this Type type)
         {
             if (type.IsMutable())
             {
@@ -171,7 +198,13 @@ namespace CommandLine.Core
             return TypeInfo.Create(type);
         }
 
-        public static object StaticMethod(this Type type, string name, params object[] args)
+        [SuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The parameter of method does not have matching annotations.",
+                Justification = "This method only use public method")]
+        public static object StaticMethod(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
+#endif
+            this Type type, string name, params object[] args)
         {
             return type.GetTypeInfo().InvokeMember(
                 name,
@@ -181,7 +214,13 @@ namespace CommandLine.Core
                 args);
         }
 
-        public static object StaticProperty(this Type type, string name)
+        [SuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The parameter of method does not have matching annotations.",
+                Justification = "This method only use public property")]
+        public static object StaticProperty(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
+#endif
+            this Type type, string name)
         {
             return type.GetTypeInfo().InvokeMember(
                 name,
@@ -191,7 +230,13 @@ namespace CommandLine.Core
                 new object[] { });
         }
 
-        public static object InstanceProperty(this Type type, string name, object target)
+        [SuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The parameter of method does not have matching annotations.",
+                Justification = "This method only use public property")]
+        public static object InstanceProperty(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
+#endif
+            this Type type, string name, object target)
         {
             return type.GetTypeInfo().InvokeMember(
                 name,
@@ -216,7 +261,11 @@ namespace CommandLine.Core
                 || Convert.GetTypeCode(type) != TypeCode.Object;
         }
 
-        public static bool IsCustomStruct(this Type type)
+        public static bool IsCustomStruct(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            this Type type)
         {
             var isStruct = type.GetTypeInfo().IsValueType && !type.GetTypeInfo().IsPrimitive && !type.GetTypeInfo().IsEnum &&  type != typeof(Guid);
             if (!isStruct) return false;

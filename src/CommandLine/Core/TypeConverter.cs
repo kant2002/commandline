@@ -8,6 +8,7 @@ using CommandLine.Infrastructure;
 using CSharpx;
 using RailwaySharp.ErrorHandling;
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CommandLine.Core
 {
@@ -69,7 +70,12 @@ namespace CommandLine.Core
             }
         }
 
-        private static Result<object, Exception> ChangeTypeScalarImpl(string value, Type conversionType, CultureInfo conversionCulture, bool ignoreValueCase)
+        private static Result<object, Exception> ChangeTypeScalarImpl(
+            string value,
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            Type conversionType, CultureInfo conversionCulture, bool ignoreValueCase)
         {
             Func<object> changeType = () =>
             {

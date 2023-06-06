@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace CommandLine.Infrastructure
@@ -7,6 +8,10 @@ namespace CommandLine.Infrastructure
     {
         private string _propertyName;
         private string _value;
+
+#if NET6_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
         private Type _type;
         private PropertyInfo _localizationPropertyInfo;
 
@@ -25,6 +30,10 @@ namespace CommandLine.Infrastructure
             }
         }
 
+
+#if NET6_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
         public Type ResourceType
         {
             set
@@ -34,6 +43,8 @@ namespace CommandLine.Infrastructure
             }
         }
 
+        [SuppressMessage("Trimming", "IL2080:'this' argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The source field does not have matching annotations.",
+            Justification = "GetProperty actually use only public properties for discovery.")]
         private string GetLocalizedValue()
         {
             if (String.IsNullOrEmpty(_value) || _type == null)

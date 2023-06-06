@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using CommandLine.Core;
@@ -82,13 +83,21 @@ namespace CommandLine.Infrastructure
                 "Microsoft.FSharp.Core.FSharpOption`1", StringComparison.Ordinal);
         }
 
-        public static T CreateDefaultImmutableInstance<T>(Type[] constructorTypes)
+        public static T CreateDefaultImmutableInstance<
+#if NET6_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            T>(Type[] constructorTypes)
         {
             var t = typeof(T);
             return (T)CreateDefaultImmutableInstance(t, constructorTypes);
         }
 
-        public static object CreateDefaultImmutableInstance(Type type, Type[] constructorTypes)
+        public static object CreateDefaultImmutableInstance(
+#if NET6_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            Type type, Type[] constructorTypes)
         {
             var ctor = type.GetTypeInfo().GetConstructor(constructorTypes);
             if (ctor == null)
